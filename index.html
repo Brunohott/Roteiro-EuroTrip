@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Roteiro">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#DCE8F2">
+<title>Roteiro 29/10 → 10/11/2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F7FA;
+    --card:#FFFFFF;
+    --ink:#18222F;
+    --soft:#6A7584;
+    --line:#E4E9EF;
+    --sea:#2A6A96;
+    --sea-soft:#E3EEF6;
+    --ok:#2F8A62;
+    --ok-soft:#E4F3EC;
+    --warn-soft:#FBF3DF;
+    --warn:#8A6412;
+    --sky1:#C9DDEE;
+    --sky2:#F1E4D6;
+    --far:#A9C0D6;
+    --near:#6F8FAD;
+    --font:"Plus Jakarta Sans","Avenir Next",-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1620; --card:#17212D; --ink:#E8EEF4; --soft:#93A1B2; --line:#243242;
+      --sea:#7DB5DC; --sea-soft:#1C3143; --ok:#62C497; --ok-soft:#173327;
+      --warn-soft:#2C2515; --warn:#E3C074;
+      --sky1:#1B2C42; --sky2:#3A2F3A; --far:#2C4460; --near:#3E5D7E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1620; --card:#17212D; --ink:#E8EEF4; --soft:#93A1B2; --line:#243242;
+    --sea:#7DB5DC; --sea-soft:#1C3143; --ok:#62C497; --ok-soft:#173327;
+    --warn-soft:#2C2515; --warn:#E3C074;
+    --sky1:#1B2C42; --sky2:#3A2F3A; --far:#2C4460; --near:#3E5D7E;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{padding-top:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  html,body{margin:0}
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--font);
+    font-size:17px;line-height:1.5;
+    padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+
+  /* ---------- hero: horizonte da viagem ---------- */
+  .hero{
+    position:relative;overflow:hidden;
+    background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 100%);
+    padding-top:calc(env(safe-area-inset-top,0px) + 36px);
+  }
+  .hero .wrap{position:relative;z-index:2;padding-bottom:210px}
+  .hero h1{font-size:clamp(34px,7vw,56px);font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:0}
+  .hero .dates{font-size:16px;color:var(--soft);margin:10px 0 22px;font-weight:500}
+  .progress{display:flex;align-items:center;gap:14px;max-width:420px}
+  .track{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.55);overflow:hidden}
+  :root[data-theme="dark"] .track{background:rgba(255,255,255,.12)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .track{background:rgba(255,255,255,.12)}}
+  .track i{display:block;height:100%;width:0;background:var(--sea);border-radius:99px;transition:width .5s ease}
+  .progress b{font-size:15px;font-weight:700;min-width:44px;text-align:right}
+  .progress small{display:block;font-size:13px;color:var(--soft);margin-top:6px}
+  .skyline{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:230px;z-index:1}
+  .skyline .far{color:var(--far)} .skyline .near{color:var(--near)} .skyline .ground{fill:var(--bg)}
+
+  /* ---------- navegação por dia ---------- */
+  nav{
+    position:sticky;top:0;z-index:20;
+    padding-top:env(safe-area-inset-top,0px);
+    background:color-mix(in srgb,var(--bg) 88%,transparent);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .days{display:flex;gap:8px;overflow-x:auto;padding:12px 20px;scrollbar-width:none;max-width:760px;margin:0 auto}
+  .days::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);
+    font:600 14px/1 var(--font);padding:10px 14px;border-radius:99px;cursor:pointer;white-space:nowrap
+  }
+  .chip.today{border-color:var(--sea);color:var(--sea)}
+  .chip.done{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+  .chip.done::before{content:"✓ "}
+  .chip.pend{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+
+  /* ---------- dias ---------- */
+  #list{padding-top:24px}
+  .day{
+    position:relative;overflow:hidden;background:var(--card);
+    border-radius:24px;margin:0 0 18px;border:1px solid var(--line);
+  }
+  .day-head{position:relative;display:flex;gap:16px;align-items:flex-start;padding:22px 22px 14px;min-height:118px}
+  .day-head .art{
+    position:absolute;right:-4px;top:10px;height:150px;width:auto;
+    color:var(--sea);opacity:.15;pointer-events:none
+  }
+  .date{flex:0 0 auto;text-align:center;min-width:52px}
+  .date .n{font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1}
+  .date .m{font-size:13px;color:var(--soft);font-weight:600;margin-top:4px}
+  .date .flag{font-size:22px;margin-top:6px;line-height:1}
+  .titles{position:relative;flex:1;min-width:0;padding-right:80px}
+  .titles h2{font-size:23px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin:2px 0 4px}
+  .titles .where{font-size:15px;color:var(--soft)}
+  .titles .count{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:var(--soft)}
+  .day.done .titles .count{color:var(--ok)}
+  .day.done .titles .count::before{content:"✓ "}
+  .note{
+    margin:0 22px 8px;padding:12px 14px;border-radius:14px;
+    background:var(--warn-soft);color:var(--warn);font-size:15px;line-height:1.45
+  }
+  .group{font-size:15px;font-weight:700;margin:18px 22px 4px}
+  .items{padding:4px 10px 12px}
+  .item{
+    width:100%;text-align:left;border:0;background:none;color:inherit;font:inherit;margin:0;
+    -webkit-appearance:none;appearance:none;
+    display:flex;align-items:flex-start;gap:14px;padding:12px;border-radius:14px;cursor:pointer;
+    transition:background .15s
+  }
+  .item:active{background:var(--sea-soft)}
+  .item{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+  .item *{pointer-events:none}
+  .box{
+    flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);
+    margin-top:1px;display:grid;place-items:center;transition:all .2s
+  }
+  .box svg{width:14px;height:14px;opacity:0;transform:scale(.4);transition:all .2s}
+  .item.on .box{background:var(--ok);border-color:var(--ok)}
+  .item.on .box svg{opacity:1;transform:scale(1)}
+  .time{flex:0 0 46px;font-size:15px;font-weight:600;color:var(--sea);font-variant-numeric:tabular-nums;padding-top:2px}
+  .time:empty{visibility:hidden}
+  .notime .time{display:none}
+  .txt{flex:1;font-size:17px;padding-top:1px}
+  .tag{
+    display:inline-block;margin-left:6px;font-size:12px;font-weight:600;color:var(--sea);
+    background:var(--sea-soft);padding:2px 8px;border-radius:99px;vertical-align:2px
+  }
+  .item.on .txt{color:var(--soft);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--soft) 60%,transparent)}
+  .item.on .time{color:var(--soft)}
+
+  footer{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:18px 2px 60px;color:var(--soft);font-size:14px
+  }
+  #sync{font-weight:600}
+  button.reset{
+    font:600 14px var(--font);background:none;border:1px solid var(--line);color:var(--soft);
+    padding:10px 16px;border-radius:99px;cursor:pointer
+  }
+  button:focus-visible,.item:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+  @media (max-width:520px){
+    .titles{padding-right:40px}
+    .day-head .art{height:86px;opacity:.1}
+    .hero .wrap{padding-bottom:96px}
+    .skyline{height:170px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ ilustrações dos pontos turísticos ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Torre Eiffel -->
+    <symbol id="eiffel" viewBox="0 0 100 200">
+      <path fill="currentColor" d="M49 0h2v16h4l3 40h4v6h-4l7 44h7v8h-6c6 26 15 56 24 86H72c-6-22-13-36-22-36s-16 14-22 36H11c9-30 18-60 24-86h-6v-8h7l7-44h-4v-6h4l3-40h4z"/>
+    </symbol>
+    <!-- Sagrada Família -->
+    <symbol id="sagrada" viewBox="0 0 170 200">
+      <g fill="currentColor">
+        <path d="M18 200V70q7-26 14 0v130z"/><path d="M40 200V48q7-28 14 0v152z"/>
+        <path d="M78 200V14q7-24 14 0v186z"/>
+        <path d="M116 200V48q7-28 14 0v152z"/><path d="M138 200V70q7-26 14 0v130z"/>
+        <circle cx="25" cy="58" r="4"/><circle cx="47" cy="36" r="4"/><circle cx="85" cy="4" r="4"/>
+        <circle cx="123" cy="36" r="4"/><circle cx="145" cy="58" r="4"/>
+        <path d="M8 200v-54l30-20 47 12 47-12 30 20v54z"/>
+      </g>
+    </symbol>
+    <!-- Puerta de Alcalá -->
+    <symbol id="alcala" viewBox="0 0 220 130">
+      <path fill="currentColor" fill-rule="evenodd" d="M110 0l40 22h60v10h-6v98H16V32h-6V22h60zM24 130h22V74H24zm150 0h22V74h-22zM56 130h24V80a12 12 0 0 0-24 0zm84 0h24V80a12 12 0 0 0-24 0zm-42 0h24V76a12 12 0 0 0-24 0z"/>
+    </symbol>
+    <!-- Notre-Dame de la Garde (Marselha) -->
+    <symbol id="garde" viewBox="0 0 220 150">
+      <path fill="currentColor" d="M0 150q50-54 88-58V70h-8v-8h14V52h6V20h4V8h2V0h2v8h2v12h4v32h6v10h14v8h-8v22q34 4 90 60z"/>
+    </symbol>
+    <!-- Savona: Torretta / farol no porto -->
+    <symbol id="savona" viewBox="0 0 200 150">
+      <path fill="currentColor" d="M70 150V44h-6V30h8v6h8v-6h8v6h8v-6h8v14h-6v106zM140 150V70l6-6h8l6 6v80zm4-94h12v8h-12zm2-10h8v10h-8zM0 140q25-8 50 0t50 0 50 0 50 0v10H0z"/>
+    </symbol>
+    <!-- navio -->
+    <symbol id="navio" viewBox="0 0 240 110">
+      <path fill="currentColor" d="M150 12h20l4 22h-26zM40 38h160l10 18H24zm-12 24h196l-18 34H44zM0 100q30-8 60 0t60 0 60 0 60 0v10H0z"/>
+    </symbol>
+    <!-- avião -->
+    <symbol id="aviao" viewBox="0 0 200 120">
+      <path fill="currentColor" d="M20 70l150-40c14-4 26 6 18 14-4 4-10 6-16 8L40 84zM86 52l-30-38h16l46 30zM90 64l-8 44h14l26-48zM26 70l-14-24h10l22 20z"/>
+    </symbol>
+    <!-- Convento da Penha (Vitória / Vila Velha) -->
+    <symbol id="penha" viewBox="0 0 220 150">
+      <path fill="currentColor" d="M0 150c20-30 40-44 58-50 12-24 30-36 46-36h4V50h28v14h-4v4c18 4 30 16 40 30 22 6 38 22 48 52zM112 30h8v20h-8zm2-8h4v8h-4z"/>
+    </symbol>
+    <!-- mala / preparação -->
+    <symbol id="mala" viewBox="0 0 160 150">
+      <path fill="currentColor" fill-rule="evenodd" d="M58 20h44v22h24a10 10 0 0 1 10 10v84a10 10 0 0 1-10 10H34a10 10 0 0 1-10-10V52a10 10 0 0 1 10-10h24zm10 8v14h24V28zM52 58v76h8V58zm48 0v76h8V58z"/>
+    </symbol>
+    <!-- estádio -->
+    <symbol id="estadio" viewBox="0 0 240 130">
+      <path fill="currentColor" fill-rule="evenodd" d="M10 130V60q110-40 220 0v70zm20-20h180V70q-90-28-180 0zM30 44l-4-24h8l4 22zm180 0l4-24h-8l-4 22z"/>
+    </symbol>
+    <symbol id="check" viewBox="0 0 16 16">
+      <path d="M3 8.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Espanha, cruzeiro<br>e Paris</h1>
+    <div class="dates">29 de outubro a 10 de novembro de 2026</div>
+    <div>
+      <div class="progress"><div class="track"><i id="bar"></i></div><b id="pct">0%</b></div>
+      <small class="progress-label" id="count" style="display:block;font-size:13px;color:var(--soft);margin-top:6px">0 de 0 itens feitos</small>
+    </div>
+  </div>
+
+  <svg class="skyline" viewBox="0 0 1200 230" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+    <!-- camada de fundo -->
+    <g class="far">
+      <use href="#alcala" x="20" y="120" width="180" height="106"/>
+      <use href="#garde" x="560" y="96" width="200" height="136"/>
+      <use href="#savona" x="770" y="130" width="140" height="100"/>
+      <use href="#penha" x="1010" y="120" width="180" height="110"/>
+    </g>
+    <!-- camada da frente -->
+    <g class="near">
+      <use href="#sagrada" x="210" y="28" width="170" height="200"/>
+      <use href="#navio" x="390" y="150" width="170" height="78"/>
+      <use href="#eiffel" x="880" y="0" width="115" height="230"/>
+    </g>
+    <path class="ground" d="M0 222q300-10 600 0t600 0V230H0z"/>
+  </svg>
+</header>
+
+<nav><div class="days" id="days"></div></nav>
+
+<main class="wrap" id="list"></main>
+
+<div class="wrap">
+  <footer>
+    <span>Toque em um item para marcar · <span id="sync">Salvo no iPad</span></span>
+    <button class="reset" id="reset">Limpar marcações</button>
+  </footer>
+</div>
+
+<script>
+window.addEventListener("error",e=>{const s=document.getElementById("sync");if(s)s.textContent="Erro: "+(e.message||e);});
+const DATA = [
+  { id:"prep", cls:"prep", d:"", m:"ANTES", w:"Preparação", f:"🧾", title:"Antes de embarcar", where:"Reservas, ingressos e documentos",
+    groups:[
+      { g:"Comprar / reservar", items:[
+        {t:"", x:"Trem alta velocidade Madrid → Barcelona (02/11, ~08:00)", key:1},
+        {t:"", x:"Passeio de barco pelo Sena (07/11, 17:45)", key:1},
+        {t:"", x:"Tour do Parc des Princes / PSG (09/11, 09:00)", key:1},
+        {t:"", x:"Subida na Torre Eiffel — ingresso com horário (07/11)", key:1},
+        {t:"", x:"Tour do Santiago Bernabéu (01/11, 09:00)"},
+        {t:"", x:"Sagrada Família — visita interna (02/11, 12:30)"},
+        {t:"", x:"Park Güell — área monumental (02/11, 16:00)"},
+        {t:"", x:"Arco do Triunfo — terraço (07/11, 14:00)"},
+        {t:"", x:"Check-in online do Costa Fascinosa"},
+        {t:"", x:"Transfer porto de Barcelona → aeroporto (06/11, 15:00)"},
+      ]},
+      { g:"Documentos e dinheiro", items:[
+        {t:"", x:"Passaporte com validade mínima de 6 meses"},
+        {t:"", x:"Conferir exigência de ETIAS para brasileiros na data"},
+        {t:"", x:"Seguro viagem com cobertura Schengen (mín. € 30.000)"},
+        {t:"", x:"Avisar o banco e liberar o cartão para uso internacional"},
+        {t:"", x:"Euros em espécie para táxis e mercados"},
+        {t:"", x:"Comprovantes de hospedagem e passagens impressos"},
+        {t:"", x:"Cópias dos documentos na nuvem e offline"},
+      ]},
+      { g:"Bagagem e tecnologia", items:[
+        {t:"", x:"eSIM ou chip internacional ativado"},
+        {t:"", x:"Adaptador de tomada tipo C/F"},
+        {t:"", x:"Mapas offline de Madrid, Barcelona e Paris"},
+        {t:"", x:"Check-in online dos voos"},
+        {t:"", x:"Bateria portátil e cabos"},
+      ]},
+    ]},
+
+  { id:"d2910", d:"29", m:"OUT", w:"Quinta", f:"🇧🇷", title:"Vitória → Madrid", where:"Voos · noite em deslocamento",
+    groups:[{g:"", items:[
+      {t:"14:10", x:"Voo Vitória → Belo Horizonte"},
+      {t:"15:10", x:"Chegada em Belo Horizonte"},
+      {t:"18:15", x:"Voo Belo Horizonte → Lisboa"},
+      {t:"", x:"Noite em voo"},
+    ]}]},
+
+  { id:"d3010", d:"30", m:"OUT", w:"Sexta", f:"🇪🇸", title:"Chegada em Madrid", where:"Centro histórico",
+    groups:[{g:"", items:[
+      {t:"11:20", x:"Chegada em Madrid"},
+      {t:"11:20", x:"Imigração, bagagem e deslocamento até o hotel"},
+      {t:"14:00", x:"Check-in / deixar as malas"},
+      {t:"15:00", x:"Puerta del Sol"},
+      {t:"", x:"Plaza Mayor"},
+      {t:"", x:"Mercado de San Miguel"},
+      {t:"", x:"Plaza de Oriente"},
+      {t:"", x:"Palácio Real — área externa"},
+      {t:"", x:"Catedral de Almudena"},
+      {t:"19:00", x:"Gran Vía e Plaza de Callao"},
+      {t:"21:00", x:"Jantar"},
+    ]}]},
+
+  { id:"d3110", d:"31", m:"OUT", w:"Sábado", f:"🇪🇸", title:"Madrid", where:"Retiro · Cibeles · Salamanca",
+    groups:[{g:"", items:[
+      {t:"08:00", x:"Café da manhã"},
+      {t:"09:00", x:"Parque do Retiro"},
+      {t:"", x:"Palácio de Cristal"},
+      {t:"", x:"Estanque Grande"},
+      {t:"", x:"Puerta de Alcalá"},
+      {t:"12:30", x:"Almoço"},
+      {t:"14:00", x:"Plaza de Cibeles"},
+      {t:"", x:"Plaza de España"},
+      {t:"", x:"Templo de Debod"},
+      {t:"17:00", x:"Bairro Salamanca — Calle Serrano"},
+      {t:"20:00", x:"Jantar"},
+    ]}]},
+
+  { id:"d0111", d:"01", m:"NOV", w:"Domingo", f:"⚽", title:"Santiago Bernabéu", where:"Madrid",
+    note:"O Real Madrid joga fora nesta data. O objetivo do dia é o tour, não a partida.",
+    groups:[{g:"", items:[
+      {t:"09:00", x:"Tour do Santiago Bernabéu", key:1},
+      {t:"", x:"Museu do Real Madrid e arquibancadas"},
+      {t:"", x:"Loja oficial e fotos"},
+      {t:"12:30", x:"Almoço"},
+      {t:"14:30", x:"Plaza Mayor e Mercado de San Miguel"},
+      {t:"", x:"Puerta del Sol e passeio pelo centro"},
+      {t:"17:30", x:"Café e compras"},
+      {t:"20:00", x:"Jantar — última noite em Madrid"},
+    ]}]},
+
+  { id:"d0211", d:"02", m:"NOV", w:"Segunda", f:"🚄", title:"Madrid → Barcelona", where:"Trem · Gaudí",
+    note:"Dia mais apertado do roteiro: Sagrada Família e Park Güell dependem de horário marcado.",
+    groups:[{g:"", items:[
+      {t:"06:30", x:"Café da manhã"},
+      {t:"07:30", x:"Check-out"},
+      {t:"08:00", x:"Trem de alta velocidade Madrid → Barcelona", key:1},
+      {t:"11:00", x:"Chegada, hotel e deixar as malas"},
+      {t:"12:30", x:"Sagrada Família — visita interna", key:1},
+      {t:"14:30", x:"Almoço"},
+      {t:"16:00", x:"Park Güell — área monumental", key:1},
+      {t:"18:30", x:"Passeig de Gràcia — Casa Batlló e La Pedrera (externo)"},
+      {t:"20:00", x:"Jantar"},
+    ]}]},
+
+  { id:"d0311", d:"03", m:"NOV", w:"Terça", f:"🚢", title:"Barcelona + embarque", where:"Gótico · Barceloneta · Porto",
+    groups:[{g:"", items:[
+      {t:"07:00", x:"Café da manhã"},
+      {t:"07:30", x:"Check-out e deixar as malas"},
+      {t:"08:00", x:"Catedral de Barcelona e Bairro Gótico"},
+      {t:"", x:"Plaça Reial e ruas históricas"},
+      {t:"10:30", x:"Las Ramblas e Mercado de La Boqueria"},
+      {t:"11:30", x:"Barceloneta — passeio pela orla"},
+      {t:"12:30", x:"Almoço"},
+      {t:"13:30", x:"Buscar as malas no hotel"},
+      {t:"14:00", x:"Táxi hotel → Porto de Barcelona"},
+      {t:"15:00", x:"Chegada ao terminal"},
+      {t:"17:30", x:"Embarque no Costa Fascinosa", key:1},
+    ]}]},
+
+  { id:"d0411", cls:"sea", d:"04", m:"NOV", w:"Quarta", f:"🇫🇷", title:"Marselha", where:"Costa Fascinosa",
+    groups:[{g:"", items:[
+      {t:"08:00", x:"Chegada em Marselha"},
+      {t:"", x:"Vieux-Port"},
+      {t:"", x:"Le Panier e centro histórico"},
+      {t:"", x:"Almoço"},
+      {t:"", x:"Notre-Dame de la Garde, se o tempo permitir"},
+      {t:"17:30", x:"Estar a bordo antes da saída do navio", key:1},
+    ]}]},
+
+  { id:"d0511", cls:"sea", d:"05", m:"NOV", w:"Quinta", f:"🇮🇹", title:"Savona", where:"Costa Fascinosa",
+    groups:[{g:"", items:[
+      {t:"08:00", x:"Chegada em Savona"},
+      {t:"", x:"Centro histórico"},
+      {t:"", x:"Fortaleza Priamar"},
+      {t:"", x:"Porto e passeio"},
+      {t:"", x:"Almoço"},
+      {t:"16:30", x:"Estar a bordo antes da saída do navio", key:1},
+    ]}]},
+
+  { id:"d0611", d:"06", m:"NOV", w:"Sexta", f:"✈️", title:"Barcelona → Paris", where:"Desembarque e voo",
+    groups:[{g:"", items:[
+      {t:"14:00", x:"Chegada do navio em Barcelona"},
+      {t:"14:00", x:"Desembarque e bagagem"},
+      {t:"15:00", x:"Táxi porto → aeroporto de Barcelona"},
+      {t:"20:45", x:"Voo Barcelona → Paris Orly", key:1},
+      {t:"22:35", x:"Chegada em Paris"},
+      {t:"23:15", x:"Orly → 2 Rue du Maréchal Harispe, 75007"},
+    ]}]},
+
+  { id:"d0711", d:"07", m:"NOV", w:"Sábado", f:"🗼", title:"Torre Eiffel + Sena", where:"Paris",
+    groups:[{g:"", items:[
+      {t:"08:00", x:"Café da manhã"},
+      {t:"09:30", x:"Trocadéro e fotos"},
+      {t:"", x:"Subida na Torre Eiffel", key:1},
+      {t:"", x:"Champ de Mars"},
+      {t:"12:00", x:"Almoço"},
+      {t:"14:00", x:"Arco do Triunfo e subida ao terraço"},
+      {t:"15:00", x:"Champs-Élysées"},
+      {t:"17:45", x:"Passeio de barco pelo Sena", key:1},
+      {t:"19:30", x:"Jantar"},
+    ]}]},
+
+  { id:"d0811", d:"08", m:"NOV", w:"Domingo", f:"🎨", title:"Paris a pé", where:"Montmartre · Marais · Pigalle",
+    groups:[{g:"", items:[
+      {t:"08:00", x:"Café da manhã"},
+      {t:"09:30", x:"Louvre — área externa e Pirâmide"},
+      {t:"11:00", x:"Montmartre, Sacré-Cœur e Place du Tertre"},
+      {t:"13:00", x:"Almoço"},
+      {t:"15:00", x:"Notre-Dame e Île de la Cité"},
+      {t:"16:00", x:"Le Marais e Place des Vosges"},
+      {t:"17:00", x:"Café e descanso"},
+      {t:"18:00", x:"Moulin Rouge e Pigalle"},
+      {t:"19:00", x:"Jantar"},
+      {t:"20:30", x:"Paris iluminada"},
+    ]}]},
+
+  { id:"d0911", d:"09", m:"NOV", w:"Segunda", f:"⚽", title:"PSG + retorno", where:"Parc des Princes · Orly",
+    note:"Estar no aeroporto às 15:00 para o voo das 20:35. Não estique o passeio da manhã.",
+    groups:[{g:"", items:[
+      {t:"07:00", x:"Café da manhã"},
+      {t:"07:30", x:"Check-out e deixar as malas no hotel"},
+      {t:"09:00", x:"Tour do Parc des Princes", key:1},
+      {t:"", x:"Vestiários, túnel e sala de troféus"},
+      {t:"10:30", x:"Retorno para pegar as malas"},
+      {t:"11:30", x:"Almoço"},
+      {t:"13:00", x:"Último passeio e compras"},
+      {t:"14:15", x:"Táxi hotel → aeroporto de Orly"},
+      {t:"20:35", x:"Voo Paris Orly → Lisboa", key:1},
+    ]}]},
+
+  { id:"d1011", d:"10", m:"NOV", w:"Terça", f:"🏠", title:"Retorno ao Brasil", where:"Lisboa · São Paulo · Vitória",
+    groups:[{g:"", items:[
+      {t:"07:30", x:"Voo Lisboa → São Paulo"},
+      {t:"09:00", x:"Chegada em São Paulo"},
+      {t:"", x:"Voo São Paulo → Vitória"},
+      {t:"", x:"Chegada em Vitória"},
+    ]}]},
+];
+
+const ART = {
+  prep:"mala", d2910:"aviao", d3010:"alcala", d3110:"alcala", d0111:"estadio",
+  d0211:"sagrada", d0311:"navio", d0411:"garde", d0511:"savona",
+  d0611:"aviao", d0711:"eiffel", d0811:"eiffel", d0911:"estadio", d1011:"penha"
+};
+const MES = {OUT:"out", NOV:"nov"};
+
+const KEY = "roteiro_2026_check";
+let state = {};
+
+const LKEY = KEY + "_local";
+let dbRef = null;
+let dirty = false;          // há mudança local ainda não confirmada na nuvem
+let lastLocalChange = 0;    // quando o usuário marcou algo pela última vez
+let pushing = false, syncTimer = null;
+
+function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+
+function setSync(txt){ const el=document.getElementById("sync"); if(el) el.textContent=txt; }
+
+const store = {
+  loadLocal(){
+    const v = lsGet(LKEY) || lsGet(KEY);
+    try{ const o = v ? JSON.parse(v) : {}; return o && typeof o==="object" ? (o.state||o) : {}; }catch(e){ return {}; }
+  },
+  save(o){
+    dirty = true;
+    lastLocalChange = Date.now();
+    const okLocal = lsSet(LKEY, JSON.stringify({state:o, t:lastLocalChange}));
+    setSync(okLocal ? "Salvo no iPad" : "Marcado");
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(pushRemote, 400);
+  }
+};
+
+async function pushRemote(){
+  if(!dbRef || pushing){ return; }
+  pushing = true;
+  const sentAt = lastLocalChange;
+  try{
+    await dbRef.set({ state: JSON.parse(JSON.stringify(state)), t: sentAt });
+    if(lastLocalChange === sentAt) dirty = false;
+    setSync("Salvo na nuvem ✓");
+  }catch(e){
+    setSync("Salvo no iPad · nuvem pendente");
+  }
+  pushing = false;
+  if(dirty && lastLocalChange !== sentAt) pushRemote();
+}
+
+async function connectCloud(){
+  try{
+    if(!window.claude || !window.claude.use) return;
+    const db = await window.claude.use("db");
+    if(!db) return;
+    dbRef = db.doc("roteiro/checks");
+    dbRef.onSnapshot(snap=>{
+      if(dirty || pushing){ pushRemote(); return; }                 // nunca desfaz um toque recente
+      if(snap.metadata && snap.metadata.hasPendingWrites) return;
+      if(!snap.exists){ if(Object.keys(state).length){ dirty=true; pushRemote(); } return; }
+      const d = snap.data() || {};
+      const remote = d.state || {};
+      const remoteT = d.t || 0;
+      if(remoteT <= lastLocalChange) return;                         // versão da nuvem é mais antiga
+      if(JSON.stringify(remote) !== JSON.stringify(state)){
+        state = remote;
+        lsSet(LKEY, JSON.stringify({state, t:remoteT}));
+        render();
+      }
+      setSync("Salvo na nuvem ✓");
+    }, ()=> setSync("Salvo no iPad"));
+  }catch(e){ /* sem nuvem: segue só local */ }
+}
+
+window.addEventListener("online", ()=>{ if(dirty) pushRemote(); });
+
+
+function todayId(){
+  const t = new Date();
+  const dd = String(t.getDate()).padStart(2,"0"), mm = String(t.getMonth()+1).padStart(2,"0");
+  return t.getFullYear()===2026 ? "d"+dd+mm : null;
+}
+
+function render(){
+  const list = document.getElementById("list");
+  const days = document.getElementById("days");
+  list.innerHTML = ""; days.innerHTML = "";
+  const hoje = todayId();
+
+  DATA.forEach(day=>{
+    const chip = document.createElement("button");
+    chip.className = "chip" + (day.id===hoje ? " today" : "");
+    chip.dataset.jump = day.id;
+    chip.textContent = day.id === "prep" ? "Antes" : (day.id===hoje ? "Hoje" : day.d + " " + MES[day.m]);
+    days.appendChild(chip);
+
+    const card = document.createElement("section");
+    card.className = "day";
+    card.id = day.id;
+
+    let h = '<div class="day-head">'+
+      '<svg class="art" viewBox="0 0 200 150" aria-hidden="true"><use href="#'+(ART[day.id]||"mala")+'" width="200" height="150"/></svg>'+
+      '<div class="date">'+
+        (day.d ? '<div class="n">'+day.d+'</div><div class="m">'+MES[day.m]+' · '+day.w.slice(0,3).toLowerCase()+'</div>'
+               : '<div class="n" style="font-size:28px">🧳</div>')+
+        (day.d ? '<div class="flag">'+day.f+'</div>' : '')+
+      '</div>'+
+      '<div class="titles"><h2>'+day.title+'</h2><div class="where">'+day.where+'</div>'+
+      '<span class="count" data-count="'+day.id+'"></span></div></div>';
+    if(day.note) h += '<div class="note">'+day.note+'</div>';
+
+    day.groups.forEach((grp,gi)=>{
+      if(grp.g) h += '<div class="group">'+grp.g+'</div>';
+      const noTime = grp.items.every(it=>!it.t);
+      h += '<div class="items'+(noTime?' notime':'')+'">';
+      grp.items.forEach((it,ii)=>{
+        const key = day.id+"-"+gi+"-"+ii;
+        h += '<button type="button" class="item'+(state[key]?" on":"")+'" data-k="'+key+'" aria-pressed="'+(!!state[key])+'">'+
+             '<span class="box"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
+             '<span class="time">'+(it.t||"")+'</span>'+
+             '<span class="txt">'+it.x+(it.key&&day.id!=='prep'?'<span class="tag">importante</span>':'')+'</span></button>';
+      });
+      h += '</div>';
+    });
+    card.innerHTML = h;
+    list.appendChild(card);
+  });
+  refresh();
+}
+
+function refresh(){
+  let total=0, done=0;
+  DATA.forEach(day=>{
+    let dt=0, dd=0;
+    day.groups.forEach((grp,gi)=>grp.items.forEach((it,ii)=>{ dt++; if(state[day.id+"-"+gi+"-"+ii]) dd++; }));
+    total+=dt; done+=dd;
+    const complete = dd===dt && dt>0;
+    document.getElementById(day.id).classList.toggle("done", complete);
+    const c = document.querySelector('[data-count="'+day.id+'"]');
+    if(c) c.textContent = complete ? "Dia concluído" : dd+" de "+dt+" feitos";
+    const chip = document.querySelector('[data-jump="'+day.id+'"]');
+    chip.classList.toggle("done", complete);
+    chip.classList.toggle("pend", day.id==="prep" && !complete);
+  });
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById("bar").style.width = pct+"%";
+  document.getElementById("count").textContent = done+" de "+total+" itens feitos";
+  document.getElementById("pct").textContent = pct+"%";
+}
+
+function toggle(item){
+  const k = item.dataset.k;
+  state[k] = !state[k];
+  if(!state[k]) delete state[k];
+  item.classList.toggle("on", !!state[k]);
+  item.setAttribute("aria-pressed", !!state[k]);
+  refresh();
+  store.save(state);
+}
+
+function up(el, test){
+  while(el && el !== document){ if(el.nodeType===1 && test(el)) return el; el = el.parentNode; }
+  return null;
+}
+document.addEventListener("click", e=>{
+  const jump = up(e.target, el=>el.hasAttribute("data-jump"));
+  if(jump){ document.getElementById(jump.dataset.jump).scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  const item = up(e.target, el=>el.classList && el.classList.contains("item"));
+  if(item) toggle(item);
+});
+
+
+document.getElementById("reset").addEventListener("click", ()=>{
+  try{ if(!confirm("Limpar todas as marcações?")) return; }catch(e){}
+  state = {};
+  store.save(state);
+  render();
+});
+
+state = store.loadLocal(); render();
+connectCloud();
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  navigator.serviceWorker.register("sw.js").then(()=>{},()=>{});
+}
+(function(){ const h=todayId(); const el=h&&document.getElementById(h); if(el) setTimeout(()=>el.scrollIntoView({block:"start"}),300); })();
+</script>
+</body>
+</html>
