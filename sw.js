@@ -1,4 +1,4 @@
-const CACHE = "roteiro-2026-v1";
+const CACHE = "roteiro-2026-v2";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -9,6 +9,7 @@ self.addEventListener("activate", e => {
 // Rede primeiro (pega atualizações); sem sinal, usa o que está guardado
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  if (e.request.url.indexOf("firestore.googleapis.com") >= 0) return; // sincronização nunca vem do cache
   e.respondWith(
     fetch(e.request).then(r => {
       const copy = r.clone();

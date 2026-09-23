@@ -261,7 +261,7 @@
 <div class="wrap">
   <footer>
     <span>Toque em um item para marcar · <span id="sync">Salvo no iPad</span></span>
-    <button class="reset" id="reset">Limpar marcações</button>
+    <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="reset" id="connect">Ativar sincronização</button><button class="reset" id="reset">Limpar marcações</button></span>
   </footer>
 </div>
 
@@ -470,73 +470,118 @@ const MES = {OUT:"out", NOV:"nov"};
 const KEY = "roteiro_2026_check";
 let state = {};
 
-const LKEY = KEY + "_local";
-let dbRef = null;
-let dirty = false;          // há mudança local ainda não confirmada na nuvem
-let lastLocalChange = 0;    // quando o usuário marcou algo pela última vez
-let pushing = false, syncTimer = null;
+/* ===== Salvamento local + sincronização via Firestore (REST, sem SDK) =====
+   Configuração vem do link:  .../roteiro/#p=ID-DO-PROJETO&k=CODIGO-SECRETO
+   Cada item guarda {v: marcado?, t: quando mudou}; na sincronização vale a mudança mais recente de cada item. */
+const LKEY = KEY + "_v2";
+const CKEY = KEY + "_cfg";
+let meta = {};                 // { chave: {v:true/false, t:ms} }
+let cfg = null;                // { p: projeto, k: segredo }
+let busy = false, again = false, timer = null;
 
-function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
-function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
-
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
 function setSync(txt){ const el=document.getElementById("sync"); if(el) el.textContent=txt; }
+
+function readCfg(){
+  const h = new URLSearchParams(location.hash.replace(/^#/,""));
+  if(h.get("p") && h.get("k")){ cfg = {p:h.get("p").trim(), k:h.get("k").trim()}; lsSet(CKEY, JSON.stringify(cfg)); return; }
+  try{ cfg = JSON.parse(lsGet(CKEY)||"null"); }catch(e){ cfg = null; }
+}
+function stateFromMeta(){ const s={}; for(const k in meta) if(meta[k].v) s[k]=true; return s; }
+function saveLocal(){ lsSet(LKEY, JSON.stringify(meta)); }
+
+function merge(remote){
+  let changed = false;
+  for(const k in remote){
+    const r = remote[k], l = meta[k];
+    if(!r || typeof r.t!=="number") continue;
+    if(!l || r.t > l.t){ meta[k] = {v:!!r.v, t:r.t}; changed = true; }
+  }
+  return changed;
+}
 
 const store = {
   loadLocal(){
-    const v = lsGet(LKEY) || lsGet(KEY);
-    try{ const o = v ? JSON.parse(v) : {}; return o && typeof o==="object" ? (o.state||o) : {}; }catch(e){ return {}; }
+    readCfg();
+    try{ meta = JSON.parse(lsGet(LKEY)||"null") || {}; }catch(e){ meta = {}; }
+    // migra marcações da versão anterior (sem data por item)
+    if(!Object.keys(meta).length){
+      try{
+        const old = JSON.parse(lsGet(KEY+"_local") || lsGet(KEY) || "null");
+        if(old){ const st = old.state || old; const t = old.t || 1; for(const k in st) if(st[k]) meta[k]={v:true,t}; saveLocal(); }
+      }catch(e){}
+    }
+    return stateFromMeta();
   },
   save(o){
-    dirty = true;
-    lastLocalChange = Date.now();
-    const okLocal = lsSet(LKEY, JSON.stringify({state:o, t:lastLocalChange}));
-    setSync(okLocal ? "Salvo no iPad" : "Marcado");
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(pushRemote, 400);
+    const now = Date.now();
+    const keys = new Set([...Object.keys(o), ...Object.keys(meta)]);
+    keys.forEach(k=>{ const v = !!o[k]; if(!meta[k] || meta[k].v !== v) meta[k] = {v, t:now}; });
+    saveLocal();
+    setSync(cfg ? "Salvo no aparelho · sincronizando…" : "Salvo neste aparelho");
+    clearTimeout(timer); timer = setTimeout(sync, 600);
   }
 };
 
-async function pushRemote(){
-  if(!dbRef || pushing){ return; }
-  pushing = true;
-  const sentAt = lastLocalChange;
+function docUrl(){
+  return "https://firestore.googleapis.com/v1/projects/"+encodeURIComponent(cfg.p)+
+         "/databases/(default)/documents/roteiros/"+encodeURIComponent(cfg.k);
+}
+
+async function sync(){
+  if(!cfg){ setSync("Salvo neste aparelho · sincronização desligada"); return; }
+  if(busy){ again = true; return; }
+  if(!navigator.onLine){ setSync("Salvo no aparelho · sem internet"); return; }
+  busy = true;
   try{
-    await dbRef.set({ state: JSON.parse(JSON.stringify(state)), t: sentAt });
-    if(lastLocalChange === sentAt) dirty = false;
-    setSync("Salvo na nuvem ✓");
+    // 1) baixa o que está na nuvem e junta com o local
+    const r = await fetch(docUrl(), {cache:"no-store"});
+    let remote = {};
+    if(r.ok){
+      const j = await r.json();
+      try{ remote = JSON.parse(j.fields && j.fields.data ? j.fields.data.stringValue : "{}"); }catch(e){ remote = {}; }
+    }else if(r.status !== 404){ throw new Error("HTTP "+r.status); }
+    if(merge(remote)){ saveLocal(); state = stateFromMeta(); render(); }
+    // 2) envia se o local tiver algo que a nuvem não tem
+    const needPush = Object.keys(meta).some(k=>!remote[k] || remote[k].t < meta[k].t);
+    if(needPush){
+      const w = await fetch(docUrl(), {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({fields:{ data:{stringValue: JSON.stringify(meta)}, t:{integerValue: String(Date.now())} }})
+      });
+      if(!w.ok) throw new Error("HTTP "+w.status);
+    }
+    const h = new Date(), hh = String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0");
+    setSync("Sincronizado ✓ "+hh);
   }catch(e){
-    setSync("Salvo no iPad · nuvem pendente");
+    setSync(String(e.message).indexOf("403")>=0 ? "Sincronização recusada (confira o código e as regras)" : "Salvo no aparelho · nuvem indisponível");
   }
-  pushing = false;
-  if(dirty && lastLocalChange !== sentAt) pushRemote();
+  busy = false;
+  if(again){ again = false; sync(); }
 }
 
-async function connectCloud(){
-  try{
-    if(!window.claude || !window.claude.use) return;
-    const db = await window.claude.use("db");
-    if(!db) return;
-    dbRef = db.doc("roteiro/checks");
-    dbRef.onSnapshot(snap=>{
-      if(dirty || pushing){ pushRemote(); return; }                 // nunca desfaz um toque recente
-      if(snap.metadata && snap.metadata.hasPendingWrites) return;
-      if(!snap.exists){ if(Object.keys(state).length){ dirty=true; pushRemote(); } return; }
-      const d = snap.data() || {};
-      const remote = d.state || {};
-      const remoteT = d.t || 0;
-      if(remoteT <= lastLocalChange) return;                         // versão da nuvem é mais antiga
-      if(JSON.stringify(remote) !== JSON.stringify(state)){
-        state = remote;
-        lsSet(LKEY, JSON.stringify({state, t:remoteT}));
-        render();
-      }
-      setSync("Salvo na nuvem ✓");
-    }, ()=> setSync("Salvo no iPad"));
-  }catch(e){ /* sem nuvem: segue só local */ }
+function updateConnectBtn(){ const b=document.getElementById("connect"); if(b) b.textContent = cfg ? "Sincronizar agora" : "Ativar sincronização"; }
+document.addEventListener("click", e=>{
+  const b = e.target.closest && e.target.closest("#connect");
+  if(!b) return;
+  if(cfg){ sync(); return; }
+  let txt = null; try{ txt = prompt("Cole aqui o link de sincronização (o que termina com #p=...&k=...)"); }catch(err){}
+  if(!txt) return;
+  const h = new URLSearchParams((txt.split("#")[1]||txt).trim());
+  if(!h.get("p") || !h.get("k")){ alert("Link inválido: ele precisa ter #p= e &k="); return; }
+  cfg = {p:h.get("p").trim(), k:h.get("k").trim()}; lsSet(CKEY, JSON.stringify(cfg));
+  updateConnectBtn(); connectCloud();
+});
+function connectCloud(){
+  updateConnectBtn();
+  if(!cfg){ setSync("Salvo neste aparelho · sincronização desligada"); return; }
+  sync();
+  setInterval(()=>{ if(document.visibilityState==="visible") sync(); }, 20000);
 }
-
-window.addEventListener("online", ()=>{ if(dirty) pushRemote(); });
-
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") sync(); });
+window.addEventListener("online", sync);
+window.addEventListener("hashchange", ()=>{ readCfg(); sync(); });
 
 function todayId(){
   const t = new Date();
